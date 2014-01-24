@@ -74,4 +74,6 @@ manager.add_command("assets", AssetsManager(assets))
 manager.add_command("clean", Clean())
 manager.add_command("new", NewModule())
 manager.add_command("install", InstallManager())
-manager.run()
+
+if __name__ == '__main__':
+    manager.run()
