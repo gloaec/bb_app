@@ -3,13 +3,13 @@ from flask import Blueprint, render_template
 
 from .post import posts
 
-__all__ = ['create_mod']
+__all__ = ['create_app']
 
 DEFAULT_BLUEPRINTS = [
     posts
 ]
 
-def create_mod(app, blueprints=None):
+def create_app(app, blueprints=None):
     """ Initiate module with current_app """
 
     if not blueprints:

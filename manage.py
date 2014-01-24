@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
+import inspect
 
 from bamboo.model import Base
 from bamboo.utils import find_subclasses, appdir
@@ -13,10 +14,6 @@ from bamboo.managers.commands import Clean, ShowUrls, Group, Option, InvalidComm
 from bb_app import create_app, models
 from bb_app.ext import db, assets
 
-#_basedir = basedir()
-#_appdir  = appdir()
-
-import inspect
 
 def module_path(local_function):
     return os.path.abspath(inspect.getsourcefile(local_function))
@@ -27,12 +24,11 @@ _basedir = os.path.dirname(__modpath__)
 _appname = os.path.basename(_basedir)
 _appdir = os.path.join(_basedir, _appname)
 
-print _appdir
-
 app = create_app()
 app.root_path        = _appdir
 app.static_folder    = os.path.join(_appdir, 'static')
 app.templates_folder = os.path.join(_appdir, 'templates')
+
 
 manager = Manager(app, with_default_commands=False)
 
@@ -73,9 +69,10 @@ def _make_context():
 	    if Base in model.__bases__:
                 models_list[model.__name__] = model
    
-    print "app = %s" % str(app)
-    print "db = %s" % str(db)
-    print "Available models: %s" % ', '.join(models_list.keys())
+    print "   app  = %s" % str(app)
+    print "    db  = %s" % str(db)
+    print "  apps -> %s" % ', '.join([mod.name for mod in app.apps])
+    print "models -> %s" % ', '.join(models_list.keys())
     return dict(app=app, db=db, **models_list)
 
 

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 import glob
+import pkgutil
 
 from flask import Flask, request, render_template
 
@@ -9,6 +10,7 @@ from .models import User
 from .config import DefaultConfig
 from .ext import db, mail, cache, login_manager, oid, babel, assets
 from .lib import INSTANCE_FOLDER_PATH
+from . import apps
 
 __all__ = ['create_app']
 
@@ -20,15 +22,13 @@ DEFAULT_BLUEPRINTS = [
     users
 ]
 
-def create_app(config=None, app_name=None, blueprints=None, modules=None):
+def create_app(config=None, app_name=None, blueprints=None):
     """Create a Flask app."""
 
     if app_name is None:
         app_name = DefaultConfig.PROJECT
     if blueprints is None:
         blueprints = DEFAULT_BLUEPRINTS
-    if modules is None:
-        modules = []
 
     app = Flask(app_name,
             instance_path=INSTANCE_FOLDER_PATH, 
@@ -37,9 +37,9 @@ def create_app(config=None, app_name=None, blueprints=None, modules=None):
     configure_app(app, config)
     configure_hook(app)
     configure_blueprints(app, blueprints)
-    configure_modules(app, modules)
+    configure_apps(app)
     configure_extensions(app)
-    configure_assets(app, modules)
+    configure_assets(app)
     configure_logging(app)
     configure_template_filters(app)
     configure_error_handlers(app)
@@ -105,7 +105,7 @@ def configure_extensions(app):
     assets.init_app(app)
 
 
-def configure_assets(app, modules):
+def configure_assets(app):
     """ Configure the asset pipeline """
 
     app.config['ASSETS_URL'] = app.static_url_path
@@ -184,7 +184,7 @@ def configure_assets(app, modules):
         all_coffee = _bundle_module(app.static_folder, '')
         jst_urls   = _all_with_extension('', 'hamlc')
 
-        for module in modules:
+        for module in app.apps:
             all_coffee.extend(_bundle_module(module.static_folder, module.name))
             jst_urls.extend(_all_with_extension(module.name, 'hamlc'))
 
@@ -248,18 +248,21 @@ def configure_blueprints(app, blueprints):
         app.register_blueprint(blueprint)
 
 
-def configure_modules(app, modules):
+def configure_apps(app):
     """Configure modules in views."""
 
-    from .apps.blog import create_mod
-    blog = create_mod(app)
-    app.register_blueprint(blog)
-    modules.append(blog)
+    app.apps = []
+    prefix = apps.__name__ + "."
 
-    #from .modules.movies import create_mod
-    #movies = create_mod(app)
-    #app.register_blueprint(movies)
-    #modules.append(movies)
+    for importer, modname, ispkg in pkgutil.iter_modules(apps.__path__, prefix):
+	if ispkg:
+            try:
+                module = __import__(modname, fromlist="create_app")
+	        mod = module.create_app(app)
+                app.register_blueprint(mod)
+                app.apps.append(mod)
+            except Exception, e:
+		print "Error loading module '%s': %s" % (modname, e)
 
 
 def configure_template_filters(app):

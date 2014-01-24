@@ -11,7 +11,7 @@ setup(
     description='{{ project.description }}',
     author='{{ project.author }}',
     author_email='{{ project.author.email }}',
-    packages=["bb_app"],
+    #packages=["bb_app"],
     include_package_data=True,
     zip_safe=False,
     install_requires=['bamboo', 'Flask-Migrate'],
