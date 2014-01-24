@@ -51,6 +51,20 @@ class InstallManager(Command):
 	execfile(setupfile)
 
 
+class TestManager(Command):
+    "Run application Test-Units"
+
+    def get_options(self):
+        return  []
+
+    def run(self):
+        import sys
+        import subprocess
+	setupfile = os.path.abspath(os.path.join(_basedir, 'setup.py'))
+	sys.argv = [setupfile, 'test']
+	execfile(setupfile)
+
+
 def _make_context():
     import inspect
     models_list = {}
@@ -74,6 +88,7 @@ manager.add_command("assets", AssetsManager(assets))
 manager.add_command("clean", Clean())
 manager.add_command("new", NewModule())
 manager.add_command("install", InstallManager())
+manager.add_command("test", TestManager())
 
 if __name__ == '__main__':
     manager.run()
