@@ -15,15 +15,23 @@
     <link rel="Shortcut Icon" href="{{ url_for('static', filename='favicon.png') }}" type="image/x-icon">
 
     {% block css %}
-        {% assets "css" %}
-            <link rel="stylesheet" href="{{ ASSET_URL }}">
-        {% endassets %}
+        {% if True %}
+            {% assets "css" %}
+                <link rel="stylesheet" href="{{ ASSET_URL }}">
+            {% endassets %}
+	{% else %}
+            <link rel="stylesheet" href="/static/app.min.css">
+	{% endif %}
     {% endblock %}
 
     {% block js_top %}
-        {% assets "js" %}
-            <script type="text/javascript" src="{{ ASSET_URL }}"></script>
-        {% endassets %}
+        {% if True %}
+            {% assets "js" %}
+                <script type="text/javascript" src="{{ ASSET_URL }}"></script>
+            {% endassets %}
+	{% else %}
+            <script type="text/javascript" src="/static/app.min.js"></script>
+	{% endif %}
     {% endblock %}
 </head>
 <body>

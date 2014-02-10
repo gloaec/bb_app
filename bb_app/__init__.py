@@ -4,12 +4,14 @@ import glob
 import pkgutil
 
 from flask import Flask, request, render_template
+from webassets import Bundle    
 
 from .views import * 
 from .models import User
 from .config import DefaultConfig
 from .ext import db, mail, cache, login_manager, oid, babel, assets
 from .lib import INSTANCE_FOLDER_PATH
+from .lib.assets import bundle_dir, bundle_module, all_files_with_extension
 from . import apps
 
 __all__ = ['create_app']
@@ -110,135 +112,113 @@ def configure_assets(app):
 
     app.config['ASSETS_URL'] = app.static_url_path
     app.config['ASSETS_CACHE'] = os.path.join(app.static_folder, '.cache')
+    app.config['JST_COMPILER'] = ' \
+                    function(template){ \
+                        return haml.compileHaml({ \
+                            source: template, generator: "coffeescript"\
+                        }); \
+                    }'
 
-    from webassets import Bundle
+    app.bundles = {}
+
+    all_js_libs = [
+            'js/lib/json2.js',
+            'js/lib/jquery.js',
+            'js/lib/spin.js',
+            'js/lib/moment.js',
+            'js/lib/jquery-spin.js',
+            'js/lib/bootstrap.js',
+            'js/lib/underscore.js',
+            'js/lib/underscore-string.js',
+            'js/lib/coffeescript.js',
+            'js/lib/haml.js',
+            'js/lib/backbone.js',
+            'js/lib/backbone-stickit.js',
+            'js/lib/backbone-validation.js',
+            'js/lib/backbone-associations.js',
+            'js/lib/backbone-cocktail.js',
+            'js/lib/backbone-picky.js',
+            'js/lib/backbone-memento.js',
+            'js/lib/backbone-actas-mementoable.js',
+            'js/lib/backbone-marionette.js',
+            'js/lib/backbone-marionette-subrouter.js']
+
+    jst_urls   = all_files_with_extension('', 'hamlc')
+
+    coffee_urls = []
+
+    coffee_roots = (
+            os.path.join(app.static_folder, 'coffee'), 
+            os.path.join(app.root_path, 'apps', '**', 'static', 'coffee')) 
+
+    for coffee_root in coffee_roots:
+        coffee_urls.extend(all_files_with_extension(os.path.join(coffee_root, 'config'),      'coffee')),
+        coffee_urls.extend(all_files_with_extension(             coffee_root,                 'coffee', depth=1)),
+        coffee_urls.extend(all_files_with_extension(os.path.join(coffee_root, 'controllers'), 'coffee')),
+        coffee_urls.extend(all_files_with_extension(os.path.join(coffee_root, 'entities'),    'coffee')),
+        coffee_urls.extend(all_files_with_extension(os.path.join(coffee_root, 'views'),       'coffee')),
+        coffee_urls.extend(all_files_with_extension(os.path.join(coffee_root, 'components'),  'coffee')),
+        coffee_urls.extend(all_files_with_extension(os.path.join(coffee_root, 'apps'),        'coffee')),
+
+    all_coffee = []
+    all_coffee.append(Bundle(
+            *coffee_urls,
+            filters="coffeescript", output='app.js'))
+    
 
     if app.debug or app.testing:
         """ Compile coffee bundle file by file """ 
 
         app.config['ASSETS_DEBUG'] = True
-        app.config['JST_COMPILER'] = ' \
-                        function(template){ \
-                            return haml.compileHaml({ \
-                                source: template, generator: "coffeescript"\
-                            }); \
-                        }'
 
-        def _bundle_dir(directory, static_root, static_folder, recursive=True):
-            bundle           = []
-            coffee_folder    = os.path.join(static_folder, 'coffee')
-            coffee_root      = os.path.join(static_root, 'coffee')
-            js_folder        = os.path.join(static_folder, 'js')
-            js_root          = os.path.join(static_root, 'js')
-            coffee_directory = os.path.join(coffee_folder, directory)
-            js_directory     = os.path.join(js_folder, directory)
-
-            if not os.path.isdir(coffee_directory):
-                return bundle
-            elif not os.path.isdir(js_directory):
-                os.makedirs(js_directory)
-
-            root, dirs, files = next(os.walk(coffee_directory))
-
-            if recursive:
-                for d in sorted(dirs):
-                    next_directory = os.path.join(directory, d)
-                    bundle.extend(_bundle_dir(next_directory, static_root,
-                            static_folder, recursive=True))
-
-            for f in sorted(files):
-                if f.endswith('.coffee'):
-                    coffee_file = os.path.join(coffee_root, directory, f)
-                    js_file     = os.path.join(js_root,   directory, f)
-                    js_file     = js_file.replace('.js.coffee', '.js')
-                    js_file     = js_file.replace('.coffee',    '.js')
-                    bundle.append(Bundle(coffee_file, filters="coffeescript", output=js_file))
-                    
-            return bundle
-
-        def _bundle_module(static_folder, static_root):
-            bundle        = []
-            js_folder     = os.path.join(static_folder, 'js')
-
-            if not os.path.exists(js_folder):
-                os.makedirs(js_folder)
-
-            bundle.extend(_bundle_dir('config',      static_root, static_folder))
-            bundle.extend(_bundle_dir('',            static_root, static_folder, recursive=False))
-            bundle.extend(_bundle_dir('controllers', static_root, static_folder))
-            bundle.extend(_bundle_dir('entities',    static_root, static_folder))
-            bundle.extend(_bundle_dir('views',       static_root, static_folder))
-            bundle.extend(_bundle_dir('components',  static_root, static_folder))
-            bundle.extend(_bundle_dir('apps',        static_root, static_folder))
-
-            return bundle
-
-        def _all_with_extension(prefix, extension, depth=6):
-            urls = []
-            if not prefix: prefix = ''
-            elif not prefix.endswith('/'): prefix+='/'
-            for i in range(depth):
-                urls.append(prefix+'**/'*i+'*.'+extension)
-            return urls
-
-        all_coffee = _bundle_module(app.static_folder, '')
-        jst_urls   = _all_with_extension('', 'hamlc')
+        all_coffee = bundle_module(app.static_folder, '')
 
         for module in app.apps:
-            all_coffee.extend(_bundle_module(module.static_folder, module.name))
-            jst_urls.extend(_all_with_extension(module.name, 'hamlc'))
+            all_coffee.extend(bundle_module(module.static_folder, module.name))
+            jst_urls.extend(all_files_with_extension(module.name, 'hamlc'))
 
-        all_css = Bundle('css/app.scss',
-                filters = 'scss',
-                output  = 'app.css',
-                depends = ('css/**/*.scss','css/**/*.sass')) 
+    else:
+        """ Compile coffee bundle all in one file """ 
 
-        all_jst = Bundle(
-                *jst_urls,
-                filters = 'jst', 
-                output  = os.path.join(app.config['ASSETS_CACHE'], 'templates.js'))
+        for module in app.apps:
+            jst_urls.extend(all_files_with_extension(module.name, 'hamlc'))
 
-        all_js = Bundle(
-                'js/lib/json2.js',
-                'js/lib/jquery.js',
-                'js/lib/spin.js',
-                'js/lib/moment.js',
-                'js/lib/jquery-spin.js',
-                'js/lib/bootstrap.js',
-                'js/lib/underscore.js',
-                'js/lib/underscore-string.js',
-                'js/lib/coffeescript.js',
-                'js/lib/haml.js',
-                'js/lib/backbone.js',
-                'js/lib/backbone-stickit.js',
-                'js/lib/backbone-validation.js',
-                'js/lib/backbone-associations.js',
-                'js/lib/backbone-cocktail.js',
-                'js/lib/backbone-picky.js',
-                'js/lib/backbone-memento.js',
-                'js/lib/backbone-actas-mementoable.js',
-                'js/lib/backbone-marionette.js',
-                'js/lib/backbone-marionette-subrouter.js',
-                all_jst,
-                *all_coffee,
-                output = 'app.js')
 
-        all_css_min = Bundle(all_css,
-                filters = 'cssmin',
-                output  = 'app.min.css')
+    app.bundles['all_jst'] = Bundle(
+            *jst_urls,
+            filters = 'jst', 
+            output  = os.path.join(app.config['ASSETS_CACHE'], 'templates.js'))
+
+    all_js = []
+    all_js.extend(all_js_libs)
+    all_js.append(app.bundles['all_jst'])
+    all_js.extend(all_coffee)
+
+    app.bundles['all_js'] = Bundle(
+            *all_js,
+            output = 'app.js')
+
+    app.bundles['all_css'] = Bundle('css/app.scss',
+            filters = 'scss',
+            output  = 'app.css',
+            depends = ('css/**/*.scss','css/**/*.sass')) 
+
+    app.bundles['all_css_min'] = Bundle(
+            app.bundles['all_css'],
+            filters = 'cssmin',
+            output  = 'app.min.css')
     
-        all_js_min = Bundle(
-                all_js, 
-                filters = 'jspacker',
-                output  = 'all.min.js')
+    app.bundles['all_js_min'] = Bundle(
+            app.bundles['all_js'], 
+            filters = 'jspacker',
+            output  = 'app.min.js')
 
-        assets.register('css', all_css)
-        assets.register('js', all_js)
-    
+    if app.debug or app.testing:
+        assets.register('css', app.bundles['all_css'])
+        assets.register('js', app.bundles['all_js'])
     else:
         assets.register('css', 'app.min.css')
         assets.register('js', 'app.min.js')
-    
 
 
 def configure_blueprints(app, blueprints):

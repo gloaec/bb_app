@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from bamboo.model import db
+# TODO: Change 'db' to 'db = SQLAlchemy()'
 
 from flask.ext.mail import Mail
 mail = Mail()
