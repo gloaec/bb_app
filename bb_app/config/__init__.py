@@ -34,7 +34,7 @@ class BaseConfig(object):
 
 class DefaultConfig(BaseConfig):
 
-    DEBUG = False
+    DEBUG = True
 
     # Flask-Sqlalchemy: http://packages.python.org/Flask-SQLAlchemy/config.html
     SQLALCHEMY_ECHO = True
