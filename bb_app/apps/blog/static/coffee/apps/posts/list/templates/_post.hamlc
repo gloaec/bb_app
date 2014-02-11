@@ -1,6 +1,9 @@
 .panel.panel-default
   .panel-heading.clearfix
     %a.title{href:"/posts/#{@id}"}
+    %small
+     =@comments_count 
+     comment(s)
     .pull-right
       %small
         by

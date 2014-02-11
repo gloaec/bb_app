@@ -170,7 +170,6 @@ def configure_assets(app):
         """ Compile coffee bundle file by file """ 
 
         app.config['ASSETS_DEBUG'] = True
-
         all_coffee = bundle_module(app.static_folder, '')
 
         for module in app.apps:

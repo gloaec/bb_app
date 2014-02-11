@@ -3,3 +3,5 @@
     .page-header
       %h1#title
     %p#content
+    %table
+      %tbody

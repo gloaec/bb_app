@@ -14,3 +14,5 @@
     getShowView: (post) ->
       new Show.Post
         model: post
+        collection: post.get('comments')
+

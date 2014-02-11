@@ -12,6 +12,8 @@
     defaults:
       posts: []
 
+  class Entities.Comment extends Entities.Model
+
   class Entities.Post extends Entities.Model
 
     urlRoot: -> "/api/posts"
@@ -20,6 +22,10 @@
       type: Backbone.One
       key: 'author'
       relatedModel: 'BambooApp.Entities.User'
+    ,
+      type: Backbone.Many
+      key: 'comments'
+      relatedModel: 'BambooApp.Entities.Comment'
     ]
 
     defaults:
