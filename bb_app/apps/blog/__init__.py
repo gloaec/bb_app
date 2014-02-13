@@ -18,7 +18,7 @@ def create_app(app, blueprints=None):
     configure_blueprints(app, blueprints)
     configure_routes(app)
 
-    return Blueprint('social', __name__, 
+    return Blueprint('blog', __name__, 
                     static_folder   = 'static', 
                     template_folder = 'templates')
 
