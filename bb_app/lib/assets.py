@@ -12,8 +12,8 @@ def bundle_dir(directory, static_root, static_folder, recursive=True):
 
     if not os.path.isdir(coffee_directory):
         return bundle
-    elif not os.path.isdir(js_directory):
-        os.makedirs(js_directory)
+    #elif not os.path.isdir(js_directory):
+    #    os.makedirs(js_directory)
 
     root, dirs, files = next(os.walk(coffee_directory))
 
