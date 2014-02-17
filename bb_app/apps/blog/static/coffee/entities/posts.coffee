@@ -14,6 +14,37 @@
 
   class Entities.Comment extends Entities.Model
 
+    urlRoot: -> "/api/comment"
+
+    defaults:
+      author: null
+
+    validation:
+      title: [
+        required: true
+        msg: 'Title is required'
+      ,
+        pattern: /^[A-Z]/
+        msg: 'Must start with capital letter'
+      ]
+      content:
+        maxLength: 140
+        msg: 'Post is too long (140 chars maximum)'
+
+
+  class Entities.CommentsCollection extends Entities.Collection
+
+    model: Entities.Comment
+
+    url: -> "/api/comments"
+
+    comparator: (m) ->
+      -m.get "created_at"
+
+    getByAuthorID: (id) ->
+      @where author_id: id
+
+
   class Entities.Post extends Entities.Model
 
     urlRoot: -> "/api/posts"

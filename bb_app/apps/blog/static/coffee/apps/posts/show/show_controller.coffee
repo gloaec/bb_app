@@ -4,13 +4,10 @@
 
     initialize: (options) ->
       post = options.post or= App.request "post:entity", options.id
-
-      @showView = @getShowView post
+      
+      App.execute 'when:fetched', post, =>
+        @show @getShowView post
 			
-      @show @showView,
-        loading:
-          entities: post
-
     getShowView: (post) ->
       new Show.Post
         model: post

@@ -15,14 +15,5 @@ class Post(Base):
     author_id   = Column(Integer, ForeignKey("users.id"))
     author      = relationship("User", uselist=False, backref="posts")
 
-    @property
-    def comments_count(self):
-        return len(self.comments)
-    #@property
-    #def serialize(self):
-    #    ret = super(Base, self).serialize
-    #    ret['comments'] = [comment.serialize for comment in self.comments]
-    #    return ret
-
     def __repr__(self):
         return '<Post #%s>' % self.id

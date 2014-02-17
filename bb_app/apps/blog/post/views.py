@@ -48,8 +48,3 @@ def delete_post(post_id):
     db.session.delete(post)
     db.session.commit()
     return post.to_json
-
-@posts.route('/<int:post_id>/comments', methods=['GET'])
-def get_comments_number(post_id):
-    """ Get the number of comments by post id """
-    return Post.query.get_or_404(post_id).comments.count
