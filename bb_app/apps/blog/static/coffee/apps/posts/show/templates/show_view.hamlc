@@ -2,6 +2,36 @@
   .row
     .page-header
       %h1#title
+      %small
+        by
+        %a{href:"/user/#{@author_id}/profile", data:{reload:true}}
+          = @author.name
+        with
+        =@comments.length
+        comment(s)
     %p#content
-    %table
-      %tbody
+    - if @comments.length > 0
+      .page-header
+      %section.lead
+        %h3 
+          Comments
+          %small
+            Listing
+            %span.badge.badge-info= @comments.length
+            comments
+          %span.pull-right
+            %a.btn.btn-success.new{href:"/comments/new"}
+              %i.icon-plus
+              New comment
+      #comments
+    - else
+      .page-header
+      %section.lead
+        %h3 
+          No comment yet!
+          %small
+            Enter your own
+          %span.pull-right
+            %a.btn.btn-success.new{href:"/comments/new"}
+              %i.icon-plus
+              New comment
