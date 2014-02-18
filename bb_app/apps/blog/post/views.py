@@ -30,6 +30,11 @@ def get_post(post_id):
     """ Get a post by id """
     return Post.query.get_or_404(post_id).to_json
 
+@posts.route('/<int:post_id>/comments', methods=['GET'])
+def get_post_comments(post_id):
+    """ Get comments by post id """
+    post = Post.query.get_or_404(post_id)
+    return json.dumps([comment.serialize for comment in post.comments])
 
 @posts.route('/<int:post_id>', methods=['PUT'])
 def update_post(post_id):

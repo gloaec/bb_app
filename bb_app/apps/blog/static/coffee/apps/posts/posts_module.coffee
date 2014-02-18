@@ -10,7 +10,6 @@
       ":id"      : "show"
       ":id/edit" : "edit"
 
-
   API =
     list: (posts=false) ->
       new PostsModule.List.Controller posts: posts
@@ -26,7 +25,6 @@
 
     delete: (id, post=false) ->
       post.destroy()
-
 
   App.vent.on "posts:clicked", (posts) ->
     App.navigate "posts"

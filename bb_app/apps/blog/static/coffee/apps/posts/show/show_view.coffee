@@ -1,5 +1,6 @@
 @BambooApp.module "PostsModule.Show", (Show, App, Backbone, Marionette, $, _) ->
 
+  ###
   class Show.Comment extends App.Views.ItemView
     template : "posts/show/_comment"
 
@@ -23,13 +24,20 @@
 
     onClose: ->
       clearInterval(@timer)
+  ###
 
-  class Show.Post extends App.Views.CompositeView
-    template: "posts/show/show_view"
+  class Show.Post extends App.Views.ItemView
+    template: "posts/show/_post"
     className: "container"
-    itemViewContainer : '#comments'
-    itemView : Show.Comment
     bindings:
       '#title'  : 'title'
       '#content': 'content'
     onRender: -> @stickit()
+
+  class Show.Layout extends App.Views.Layout
+    template: "posts/show/show_layout"
+
+    regions:
+      postRegion:      "#post-region"
+      commentsRegion:  "#comments-region"
+

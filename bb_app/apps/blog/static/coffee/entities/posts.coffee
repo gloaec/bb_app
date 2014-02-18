@@ -36,7 +36,14 @@
 
     model: Entities.Comment
 
-    url: -> "/api/comments"
+    initialize: (models, options) ->
+      @options = options
+
+    url: -> 
+      if @options.post_id?
+        "/api/posts/#{@options.post_id}/comments"
+      else
+        "/api/comments"
 
     comparator: (m) ->
       -m.get "created_at"
@@ -99,9 +106,17 @@
       post.fetch()
       post
 
+    getPostComments: (post_id) ->
+      comments = new Entities.CommentsCollection([], post_id: post_id)
+      comments.fetch()
+      comments
+
 
   App.reqres.setHandler "post:entities", ->
     API.getPosts()
     
   App.reqres.setHandler "post:entity", (id) ->
     API.getPost id
+
+  App.reqres.setHandler "post:comment:entities", (id) ->
+    API.getPostComments id

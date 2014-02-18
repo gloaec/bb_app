@@ -4,12 +4,29 @@
 
     initialize: (options) ->
       post = options.post or= App.request "post:entity", options.id
+
+      @layout = @getLayoutView()
       
-      App.execute 'when:fetched', post, =>
-        @show @getShowView post
-			
-    getShowView: (post) ->
+      @listenTo @layout, "show", =>
+        @postView post
+        @commentsView post
+
+      @show @layout, 
+        loading:
+          entities: post
+
+    postView: (post) ->
+      postView = @getPostView post
+      @show postView, region: @layout.postRegion
+
+    commentsView: (post) ->
+      commentsView = App.execute "list:post:comments",
+        post: post
+        region: @layout.commentsRegion
+
+    getPostView: (post) ->
       new Show.Post
         model: post
-        collection: post.get('comments')
 
+    getLayoutView: ->
+      new Show.Layout
