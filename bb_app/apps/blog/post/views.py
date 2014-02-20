@@ -3,7 +3,7 @@ from flask.ext.login import current_user
 
 from bb_app.ext import db
 from .models import Post
-
+from ..comment.models import Comment
 
 posts = Blueprint('posts', __name__, url_prefix='/api/posts')
 
@@ -24,6 +24,16 @@ def create_post():
     db.session.commit()
     return json.dumps(post.serialize)
 
+@posts.route('/<int:post_id>/comments',  methods=['POST'])
+def create_post_comment(post_id):
+    """ Create a new post comment """
+    request.json['author'] = current_user
+    request.json['post'] = Post.find(post_id)
+    print(request.json)
+    comment = Comment(**request.json)
+    db.session.add(comment)
+    db.session.commit()
+    return json.dumps(comment.serialize)
 
 @posts.route('/<int:post_id>', methods=['GET'])
 def get_post(post_id):

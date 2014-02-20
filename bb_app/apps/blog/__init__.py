@@ -2,11 +2,12 @@
 from flask import Blueprint, render_template
 
 from .post import posts
+from .comment import comments
 
 __all__ = ['create_app']
 
 DEFAULT_BLUEPRINTS = [
-    posts
+    posts, comments
 ]
 
 def create_app(app, blueprints=None):

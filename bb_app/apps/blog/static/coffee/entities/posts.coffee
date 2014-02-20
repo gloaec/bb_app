@@ -14,10 +14,16 @@
 
   class Entities.Comment extends Entities.Model
 
-    urlRoot: -> "/api/comment"
+    urlRoot: -> "/api/comments"
 
     defaults:
       author: null
+
+    relations: [
+      type: Backbone.One
+      key: 'post'
+      relatedModel: 'BambooApp.Entities.Post'
+    ]
 
     validation:
       title: [
@@ -37,7 +43,7 @@
     model: Entities.Comment
 
     initialize: (models, options) ->
-      @options = options
+      @options = options || {}
 
     url: -> 
       if @options.post_id?
@@ -54,6 +60,11 @@
 
   class Entities.Post extends Entities.Model
 
+    set: (key, value, options) ->
+      ret = Entities.Model::set.apply @, arguments
+      @get('comments').options.post_id = @id
+      ret
+      
     urlRoot: -> "/api/posts"
 
     relations: [
@@ -63,7 +74,8 @@
     ,
       type: Backbone.Many
       key: 'comments'
-      relatedModel: 'BambooApp.Entities.Comment'
+      #relatedModel: 'BambooApp.Entities.Comment'
+      collectionType: 'BambooApp.Entities.CommentsCollection'
     ]
 
     defaults:
@@ -106,11 +118,9 @@
       post.fetch()
       post
 
-    getPostComments: (post_id) ->
-      comments = new Entities.CommentsCollection([], post_id: post_id)
-      comments.fetch()
-      comments
-
+    getPostComments: (post) ->
+      post.get('comments').fetch()
+      post.get('comments')
 
   App.reqres.setHandler "post:entities", ->
     API.getPosts()
@@ -118,5 +128,5 @@
   App.reqres.setHandler "post:entity", (id) ->
     API.getPost id
 
-  App.reqres.setHandler "post:comment:entities", (id) ->
-    API.getPostComments id
+  App.reqres.setHandler "post:comment:entities", (post) ->
+    API.getPostComments post

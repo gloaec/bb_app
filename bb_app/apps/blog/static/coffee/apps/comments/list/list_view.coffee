@@ -1,21 +1,10 @@
 @BambooApp.module "CommentsModule.List", (List, App, Backbone, Marionette, $, _) ->
 
-  ###
-  class List.Layout extends App.Views.Layout
-    template: "posts/list/list_layout"
-
-    regions:
-      resultsRegion: 		"#results-region"
-      postsRegion:		  "#posts-region"
-      paginationRegion:	"#pagination-region"
-  ###
-
   class List.Comment extends App.Views.ItemView
     template: "comments/list/_comment"
 
     initialize: ->
       @timer = setInterval =>
-        @model.trigger "change:updated_at", @model
         @model.trigger "change:created_at", @model
       , 30000
 
@@ -40,3 +29,11 @@
     template: "comments/list/comments"
     itemView: List.Comment
     itemViewContainer: "#comments"
+
+  class List.Layout extends App.Views.Layout
+    template: "comments/list/list_layout"
+
+    regions:
+      newCommentRegion:      "#newcomment-region"
+      listCommentsRegion:    "#listcomments-region"
+      

@@ -4,4 +4,5 @@
 *#*#
 *.#*
 *~
-*.cache/*
+bb_app/static/.cache/*
+!bb_app/static/.cache/.keep
