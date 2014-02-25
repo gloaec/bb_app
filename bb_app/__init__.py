@@ -144,6 +144,7 @@ def configure_assets(app):
             'js/lib/backbone-marionette-subrouter.js']
 
     jst_urls   = all_files_with_extension('', 'hamlc')
+    css_urls   = all_files_with_extension('', 'css')
 
     coffee_urls = []
 
@@ -175,13 +176,14 @@ def configure_assets(app):
         for module in app.apps:
             all_coffee.extend(bundle_module(module.static_folder, module.name))
             jst_urls.extend(all_files_with_extension(module.name, 'hamlc'))
+            css_urls.extend(all_files_with_extension(module.name, 'css'))
 
     else:
         """ Compile coffee bundle all in one file """ 
 
         for module in app.apps:
             jst_urls.extend(all_files_with_extension(module.name, 'hamlc'))
-
+            css_urls.extend(all_files_with_extension(module.name, 'css'))
 
     app.bundles['all_jst'] = Bundle(
             *jst_urls,
@@ -197,10 +199,14 @@ def configure_assets(app):
             *all_js,
             output = 'app.js')
 
-    app.bundles['all_css'] = Bundle('css/app.scss',
-            filters = 'scss',
+    app.bundles['all_scss'] = Bundle('css/app.scss',
+            filters = 'pyscss',
             output  = 'app.css',
-            depends = ('css/**/*.scss','css/**/*.sass')) 
+            depends = ('css/**/*.scss','css/**/*.sass','css/**/*.css','css/*.css')) 
+
+    #FIXME: change for relative urls
+    app.bundles['all_css'] = Bundle(app.bundles['all_scss'],
+            output  = 'app.css') 
 
     app.bundles['all_css_min'] = Bundle(
             app.bundles['all_css'],
