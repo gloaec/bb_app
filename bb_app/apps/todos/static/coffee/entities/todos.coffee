@@ -6,6 +6,7 @@
 
     defaults:
       content: ""
+      is_completed: false
 
     validation:
       content:[

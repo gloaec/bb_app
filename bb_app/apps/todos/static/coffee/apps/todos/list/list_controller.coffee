@@ -26,12 +26,22 @@
 		
     todosView: (todos) ->
       todosView = @getTodosView todos
-      
-      @show todosView, region: @layout.todosMainRegion
+
+      todosView.on "childview:destroy:todo:clicked", (todo) ->
+        App.vent.trigger "destroy:todo:clicked", todo
+
+      @show todosView,
+        loading: true
+        region: @layout.todosMainRegion
 
     footerView: (todos) ->
       footerView = @getFooterView todos
+
+      footerView.on "clear-completed:todos:clicked", (todos) ->
+        App.vent.trigger "clear-completed:todos:clicked", todos
+        
       @show footerView, region: @layout.todosFooterRegion
+
 
     getNewTodoView: (todos) ->
       new List.NewTodo

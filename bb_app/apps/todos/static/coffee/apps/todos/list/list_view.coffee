@@ -14,6 +14,26 @@
     tagName: 'li'
     ui:
       checkbox: 'input[type=checkbox]'
+      mainCheckbox: '#toggle-all'
+
+    initialize: ->
+      @listenTo @model, 'all', @render, @
+            
+    events:
+      "click .destroy" : -> @trigger 'destroy:todo:clicked', @model
+      "click .toggle" : 'onToggle'
+
+    onToggle : =>
+      if @model.get('is_completed')
+        console.log "était complété", @$el, document.getElementById('toggle-all')
+        document.getElementById('toggle-all').checked = false
+      @model.set('is_completed', not @model.get('is_completed'))
+      @model.save null,
+        success: =>
+          #@trigger 'toggle:todo:clicked', @collection
+        error: (todo, jqXHR) =>
+          @showErrors $.parseJSON(jqXHR.responseText)
+
       
     onRender: ->
       if @model.get('is_completed')
@@ -30,6 +50,20 @@
     itemView: List.Todo
     itemViewContainer: "#todo-list"
 
+    events:
+      "click #toggle-all" : 'onToggleAll'
+
+    onToggleAll: (e) ->
+      wasChecked = not e.target.checked
+      if wasChecked
+        e.target.checked = false
+        _.each @collection.models, (model) =>
+          model.set('is_completed', false)
+      else
+        e.target.checked = true
+        _.each @collection.models, (model) =>
+          model.set('is_completed', true)
+        
 
   class List.NewTodo extends App.Views.ItemView
     template: "todos/list/_newtodo"
@@ -47,12 +81,11 @@
       ENTER = 13
       switch e.which
         when ENTER
-          console.log "entrée", @model
           if @model.isValid(true)
             @model.save null,
               success: =>
                 @collection.add(@model)
-                App.execute 'flash:success', "Todo successfully created"
+                #App.execute 'flash:success', "Todo successfully created"
                 @trigger 'new:todo:clicked', @collection
               error: (todo, jqXHR) =>
                 @showErrors $.parseJSON(jqXHR.responseText)
@@ -66,6 +99,9 @@
 
     initialize: ->
       @listenTo @collection, 'all', @render, @
+
+    events:
+      "click #clear-completed" : -> @trigger 'clear-completed:todos:clicked', @collection
 
     serializeData: ->
       _.extend super(),
