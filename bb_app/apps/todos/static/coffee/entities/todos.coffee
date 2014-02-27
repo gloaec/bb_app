@@ -28,10 +28,13 @@
 
     getByAuthorID: (id) ->
       @where author_id: id
-	
+
     getCompleted: ->
-      @where is_completed: true
-    
+      new Entities.TodosCollection @where is_completed: true
+
+    getActive: ->
+      new Entities.TodosCollection @where is_completed: false
+          
   API =
     getTodos: () ->
       todos = new Entities.TodosCollection

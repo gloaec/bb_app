@@ -28,6 +28,7 @@ def update_todo(todo_id):
     """ Update a todo by id """
     todo = Todo.query.get_or_404(todo_id)
     todo.content = request.json.get('content', None)
+    todo.is_completed = request.json.get('is_completed', False)
     db.session.commit()
     return json.dumps(todo.serialize)
 

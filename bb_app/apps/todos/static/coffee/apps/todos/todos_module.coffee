@@ -5,19 +5,26 @@
     prefix: "todos"
 
     appRoutes:
-      ""         : "list"
-
+      ""          : "list"
+      "completed" : "list_completed"  
+      "active"    : "list_active"
+      
   API =
     list: (todos=false) ->
-      new TodosModule.List.Controller todos: todos
+      new TodosModule.List.Controller todos: todos, show: "all"
 
+    list_completed: (todos=false) ->
+      new TodosModule.List.Controller todos: todos, show: "completed"
+
+    list_active: (todos=false) ->
+      new TodosModule.List.Controller todos: todos, show: "active"
+      
     delete: (id, todo=false) ->
-      console.log "coucou"
       todo.destroy()
 
     clearCompleted: (todos=false) ->
-      _.each todos.models, (todo) =>
-        todo.destroy() if todo.get('is_completed')
+      _.each todos.getCompleted().models, (todo) ->
+        todo.destroy()
 
   App.vent.on "todos:clicked", (todos) ->
     App.navigate "todos"

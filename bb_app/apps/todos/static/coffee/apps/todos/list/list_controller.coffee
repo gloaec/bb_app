@@ -4,18 +4,19 @@
 
     initialize: (options) ->
       todos = options.todos or= App.request "todo:entities"
+      show = options.show
 
       @layout = @getLayoutView()
 			
       @listenTo @layout, "show", =>
         @newTodoView todos
-        @todosView todos
+        @todosView @getTodosToShow todos, show
         @footerView todos
 			
       @show @layout,
         loading:
           entities: todos
-		
+
     newTodoView: (todos) ->
       newTodoView = @getNewTodoView todos
 
@@ -27,7 +28,7 @@
     todosView: (todos) ->
       todosView = @getTodosView todos
 
-      todosView.on "childview:destroy:todo:clicked", (todo) ->
+      todosView.on "childview:destroy:todo:clicked", (iv, todo) ->
         App.vent.trigger "destroy:todo:clicked", todo
 
       @show todosView,
@@ -42,7 +43,12 @@
         
       @show footerView, region: @layout.todosFooterRegion
 
-
+    getTodosToShow: (todos, show) ->
+      switch show
+        when "completed" then return todos.getCompleted()
+        when "active" then return todos.getActive()
+        else return todos
+        
     getNewTodoView: (todos) ->
       new List.NewTodo
         model: new todos.model()

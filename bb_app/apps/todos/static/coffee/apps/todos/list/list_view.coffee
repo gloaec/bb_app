@@ -25,7 +25,6 @@
 
     onToggle : =>
       if @model.get('is_completed')
-        console.log "était complété", @$el, document.getElementById('toggle-all')
         document.getElementById('toggle-all').checked = false
       @model.set('is_completed', not @model.get('is_completed'))
       @model.save null,
@@ -105,6 +104,6 @@
 
     serializeData: ->
       _.extend super(),
-        completedCount: @collection.getCompleted().length
-        itemsLeft: @collection.size()-@collection.getCompleted().length
+        completedCount: @collection.getCompleted().size()
+        itemsLeft: @collection.size()-@collection.getCompleted().size()
       
