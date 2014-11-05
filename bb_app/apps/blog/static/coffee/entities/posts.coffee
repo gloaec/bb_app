@@ -45,7 +45,7 @@
     initialize: (models, options) ->
       @options = options || {}
 
-    url: -> 
+    url: ->
       if @options.post_id?
         "/api/posts/#{@options.post_id}/comments"
       else
@@ -74,12 +74,13 @@
     ,
       type: Backbone.Many
       key: 'comments'
-      #relatedModel: 'BambooApp.Entities.Comment'
+      relatedModel: 'BambooApp.Entities.Comment'
       collectionType: 'BambooApp.Entities.CommentsCollection'
     ]
 
     defaults:
       author: null
+      comments: []
 
     validation:
       title: [

@@ -11,7 +11,7 @@
         @postView post
         @commentsView post
 
-      @show @layout, 
+      @show @layout,
         loading:
           entities: post
 

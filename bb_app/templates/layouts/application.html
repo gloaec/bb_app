@@ -24,15 +24,6 @@
 	{% endif %}
     {% endblock %}
 
-    {% block js_top %}
-        {% if True %}
-            {% assets "js" %}
-                <script type="text/javascript" src="{{ ASSET_URL }}"></script>
-            {% endassets %}
-	{% else %}
-            <script type="text/javascript" src="/static/app.min.js"></script>
-	{% endif %}
-    {% endblock %}
 </head>
 <body>
     {% include "macros/_ask_user_to_update_ie.html" %}
@@ -172,6 +163,16 @@
             <li><a href='http://imwilsonxu.net'>Blog</a></li>
         </ul>
     </footer>
+
+    {% block js_top %}
+        {% if True %}
+            {% assets "js" %}
+                <script type="text/javascript" src="{{ ASSET_URL }}"></script>
+            {% endassets %}
+	{% else %}
+            <script type="text/javascript" src="/static/app.min.js"></script>
+	{% endif %}
+    {% endblock %}
 
     {% block js_bottom %}
     {% endblock %}
